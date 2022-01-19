@@ -213,14 +213,14 @@ giveSpecialtyQuickdraw()
 {
 	self _setPerk ("specialty_quickdraw",1);	
 	self setclientdvar ("perk_quickDrawSpeedScale","1.82");
-	self iprintlnbold ("^3 10 Killstreak: ^2ADS Speed Increased!");
+	self iprintlnbold ("^3 12 Killstreak: ^2ADS Speed Increased!");
 	return;
 }
 
 giveSpecialtyMovementSpeed()
 {
 	self _setPerk( "specialty_lightweight", 1 );
-	self.moveSpeedScaler = 1.5;
+	self.moveSpeedScaler = 1.35;
 	self setmovespeedscale( self.moveSpeedScaler );
 	self iprintlnbold( "^3 14 Killstreak: ^2Movement Speed Increased!" );
 	return;
