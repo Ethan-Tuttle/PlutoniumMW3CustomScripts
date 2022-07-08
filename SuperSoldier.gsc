@@ -4,11 +4,13 @@
 #include maps\mp\killstreaks\_killstreaks;
 #include maps\mp\_events;
 #include maps\mp\killstreaks\_teamammorefill;
+#include scripts\nukespawns;
 
 init()
 {
     level thread onPlayerConnect();
 	level thread replaceSpecialist();
+	
 	
 }   
  
@@ -72,7 +74,7 @@ giveAllPerks()
 	//var_0[ var_0.size ] = "specialty_holdbreathwhileads";
 
 	// too op?
-	var_0[ var_0.size ] = "specialty_moredamage";
+	//var_0[ var_0.size ] = "specialty_moredamage";
 
 	foreach ( var_2 in var_0 )
 	{
@@ -89,6 +91,11 @@ giveAllPerks()
 	}
 }
 
+/*replaceScavengerFunctionality()
+{
+	replaceFunc( maps\mp\gametypes\_weapons::handleScavengerBagPickup, ::handleScavengerBagPickup );
+}
+*/
 KillstreakPlayer()
 {
 	self endon ("disconnect");
@@ -117,8 +124,12 @@ superSoldier()
 	messageShownAutoReload = 0;
 	//Flag to show upgraded steady aim perk
 	messageShownSteadyAim = 0;
-	//Flag to show upgraded steady aim perk
-	messageShownHealthRegen = 0;
+	//Flag to show health regeneration
+	messageShownHealthRegen = 0; 
+	//Flag to show Damage acquisition
+	messageShownDamage = 0;
+	//Flag to show Scavenger Bag equipment notice
+	messageShownScavenger = 0;
 
 	currentKills = 0;
 	previousKills = currentKills;
@@ -131,7 +142,7 @@ superSoldier()
 		//if the player has blastshield
 		if ( isdefined( self.perks["_specialty_blastshield"] ) )
 		{
-			self.stunScaler = 0.4; 	//How long we stay stunned gets nerfed HARD
+			self.stunScaler = 0.4; 	//How long we stay stunned/flashed gets nerfed HARD
 		}
 
 		//if the player is on a 12 killstreak or higher AND we have not shown the message yet
@@ -165,12 +176,12 @@ superSoldier()
 
 			if (messageShownAutoReload == 0)
 			{
-				self iprintlnbold( "^3 16 Killstreak: ^2Auto Reload on kills Enabled!" );
+				self iprintlnbold( "^3 16 Killstreak: ^2Kills Fill Magazine!" );
 				messageShownAutoReload = 1;
 			}
 		}
 
-		//if the player is on a 10 killstreak or higher AND we have not shown the message yet
+		//if the player is on an 18 killstreak or higher AND we have not shown the message yet
 		if ( (self.pers["cur_kill_streak"] >= 18) && (messageShownSteadyAim == 0) )
 		{	
 			//Give player modifiers and show message
@@ -178,7 +189,7 @@ superSoldier()
 			messageShownSteadyAim = 1;
 		}	
 
-		//if the current killstreak is above a 20 killstreak
+		//if the current killstreak is above or equal to a 20 killstreak
 		if ( (self.pers["cur_kill_streak"] >= 20) )
 		{	
 			//if the amount of kills this frame is greater than the previous ammount, apply the perk
@@ -193,12 +204,28 @@ superSoldier()
 
 			if (messageShownHealthRegen == 0)
 			{
-				self iprintlnbold( "^3 20 Killstreak: ^2Health regen on kills Enabled!" );
+				self iprintlnbold( "^3 20 Killstreak: ^2Kills Trigger Health Regeneration!" );
 				messageShownHealthRegen = 1;
 			}
 		}
-
+		
+		//if the player is on a 25 killstreak or higher AND we have not shown the message yet
+		if ( (self.pers["cur_kill_streak"] >= 25) && (messageShownDamage == 0) )
+		{	
+			//Give player modifiers and show message
+			self giveSpecialtyDamage();
+			messageShownDamage = 1;
+		}
 		wait .1;
+		
+		//if the player is on a 10 killstreak or higher AND we have not shown the message yet
+		/*if ( (self.pers["cur_kill_streak"] >= 10) && (messageShownScavenger == 0) )
+		{	
+			//Give player modifiers and show message
+			self handleScavengerBagPickup();
+			messageShownScavenger = 1;
+		}
+		wait .1;      */
 	}
 }
 
@@ -252,7 +279,7 @@ givesuperSteadyAim()
 {
 	self setaimspreadmovementscale( 0.2 );
 	self setspreadoverride( 2 );
-	self iprintlnbold( "^3 18 Killstreak: ^2Aim Spread Decreased!" );
+	self iprintlnbold( "^3 18 Killstreak: ^2Hip-Fire Accuracy Increased!" );
 	return;
 }
 
@@ -261,3 +288,40 @@ triggerHealthRegen()
 	self.health = self.maxHealth;
 	return;
 }
+
+giveSpecialtyDamage()
+{
+	self _setPerk ("specialty_moredamage");
+	self iprintlnbold( "^3 25 Killstreak: ^2All Bullet Damage Increased!" );
+	return;
+}
+
+/*handleScavengerBagPickup()
+{
+	self endon( "death" );
+	level endon( "game_ended" );
+	self waittill( "scavenger",  var_1  );
+	var_1 notify( "scavenger_pickup" );
+	var_1 playlocalsound( "scavenger_pack_pickup" );
+	var_2 = var_1 getweaponslistoffhands();
+
+	foreach ( var_4 in var_2 )
+	{
+		var_5 = var_1 getweaponammoclip( var_4 );
+		var_1 setweaponammoclip( var_4, var_5 + 1 );
+	}
+
+	var_7 = var_1 getweaponslistprimaries();
+
+	foreach ( var_9 in var_7 )
+	{
+		var_10 = var_1 getweaponammostock( var_9 );
+		var_11 = weaponclipsize( var_9 );
+		var_1 setweaponammostock( var_9, var_10 + var_11 );
+	}
+
+	var_1 maps\mp\gametypes\_damagefeedback::updateDamageFeedback( "scavenger" );
+	self iprintlnbold( "^3 10 Killstreak: ^2Scavenger Bags Replenish Equipment!" );
+	return;
+}
+*/
