@@ -10,8 +10,6 @@ init()
 {
     level thread onPlayerConnect();
 	level thread replaceSpecialist();
-	
-	
 }   
  
 onPlayerConnect()
@@ -33,7 +31,7 @@ onPlayerSpawned()
 	
     {	
 		self waittill ("spawned_player");
-		level.blastShieldMod = 0.3; //Blast Shield Hella Buffed
+		level.blastShieldMod = 0.3; 	//Blast Shield Hella Buffed
 		self thread superSoldier();
 		self thread defaultPerkValues();
 	}    
@@ -69,13 +67,6 @@ giveAllPerks()
 	var_0[var_0.size] = "specialty_reducedsway";
 	var_0[var_0.size] = "specialty_lightweight";
 
-	// patch_mp removed these? why
-	//var_0[ var_0.size ] = "specialty_bulletpenetration";
-	//var_0[ var_0.size ] = "specialty_holdbreathwhileads";
-
-	// too op?
-	//var_0[ var_0.size ] = "specialty_moredamage";
-
 	foreach ( var_2 in var_0 )
 	{
 		if ( !maps\mp\_utility::_hasPerk( var_2 ) )
@@ -91,11 +82,6 @@ giveAllPerks()
 	}
 }
 
-/*replaceScavengerFunctionality()
-{
-	replaceFunc( maps\mp\gametypes\_weapons::handleScavengerBagPickup, ::handleScavengerBagPickup );
-}
-*/
 KillstreakPlayer()
 {
 	self endon ("disconnect");
@@ -217,23 +203,14 @@ superSoldier()
 			messageShownDamage = 1;
 		}
 		wait .1;
-		
-		//if the player is on a 10 killstreak or higher AND we have not shown the message yet
-		/*if ( (self.pers["cur_kill_streak"] >= 10) && (messageShownScavenger == 0) )
-		{	
-			//Give player modifiers and show message
-			self handleScavengerBagPickup();
-			messageShownScavenger = 1;
-		}
-		wait .1;      */
 	}
 }
 
 defaultPerkValues()
 {
-	self setclientdvar( "perk_quickDrawSpeedScale" , "1.5" ); 	//Base Quickdraw Speed
-	self _setperk( "specialty_longersprint" , 1 ); 				//Extreme Conditioning
-	self _setperk( "specialty_fastmantle" , 1 ); 				//Extreme Conditioning Pro
+	self setclientdvar( "perk_quickDrawSpeedScale" , "1.5" );
+	self _setperk( "specialty_longersprint" , 1 ); 			
+	self _setperk( "specialty_fastmantle" , 1 ); 				
 }
 
 giveSpecialtyQuickdraw()
@@ -295,33 +272,3 @@ giveSpecialtyDamage()
 	self iprintlnbold( "^3 25 Killstreak: ^2All Bullet Damage Increased!" );
 	return;
 }
-
-/*handleScavengerBagPickup()
-{
-	self endon( "death" );
-	level endon( "game_ended" );
-	self waittill( "scavenger",  var_1  );
-	var_1 notify( "scavenger_pickup" );
-	var_1 playlocalsound( "scavenger_pack_pickup" );
-	var_2 = var_1 getweaponslistoffhands();
-
-	foreach ( var_4 in var_2 )
-	{
-		var_5 = var_1 getweaponammoclip( var_4 );
-		var_1 setweaponammoclip( var_4, var_5 + 1 );
-	}
-
-	var_7 = var_1 getweaponslistprimaries();
-
-	foreach ( var_9 in var_7 )
-	{
-		var_10 = var_1 getweaponammostock( var_9 );
-		var_11 = weaponclipsize( var_9 );
-		var_1 setweaponammostock( var_9, var_10 + var_11 );
-	}
-
-	var_1 maps\mp\gametypes\_damagefeedback::updateDamageFeedback( "scavenger" );
-	self iprintlnbold( "^3 10 Killstreak: ^2Scavenger Bags Replenish Equipment!" );
-	return;
-}
-*/
