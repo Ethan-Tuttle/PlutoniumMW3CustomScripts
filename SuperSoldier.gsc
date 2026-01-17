@@ -33,19 +33,25 @@ onPlayerSpawned()
 		level.blastShieldMod = 0.3; 	//Blast Shield Hella Buffed
 		self thread superSoldier();
 
-		if( self.activeIcons != undefined )
-		{
-			for(i = 0; i < self.activeIcons.size; i++)
-			{
+		if ( self.activeIcons != undefined ) {
+			for ( i = 0; i < self.activeIcons.size; i++ ) {
 				if ( self.activeIcons[i] != undefined ) {
 					self.activeIcons[i] destroy();
 				}
 			}
-			self.activeIcons.clear();
+			
+			// reset icons
+			for ( i = 0; i < self.activeIconsSize; i++ ) {
+				self.activeIcons[i] = [];
+			}
 		}
 		else
 		{
 			self.activeIcons = [];
+			self.activeIconsSize = 50;
+			for ( i = 0; i < self.activeIconsSize; i++ ) {
+				self.activeIcons[i] = [];
+			}
 		}
 	}    
 }
@@ -65,7 +71,16 @@ showKillstreakAlert( icon_name, message , sound ) {
 	self.newIcon.HideWhenInMenu = true;       
 	self.newIcon.foreground = false;
 
-	self.activeIcons pushBack(self.newIcon);
+	setIndex = -1;
+	for ( i = 0; i < self.activeIconsSize; i++ ) {
+		if ( self.activeIcons[i] != undefined ) {
+			
+		} else {
+			setIndex = i;
+			self.activeIcons[i] = self.newIcon;
+			break;
+		}
+	}
 	
 	self.newIcon fadeOverTime(0.3);
 	self.newIcon.alpha = 1;
@@ -75,7 +90,13 @@ showKillstreakAlert( icon_name, message , sound ) {
 	self.newIcon.alpha = 0;
 
 	wait 0.3;
-	self.activeIcons remove(self.newIcon);
+	
+	if ( setIndex != -1 ) {
+		if ( self.activeIcons[setIndex] != undefined ) {
+			self.activeIcons[setIndex] = [];
+		}
+	}
+
 	self.newIcon destroy();
 }
 
