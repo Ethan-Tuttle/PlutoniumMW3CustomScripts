@@ -1,16 +1,16 @@
 #include common_scripts\utility;
 #include maps\mp\_utility;
 #include maps\mp\gametypes\_hud_util;
+#include maps\mp\gametypes\_hud_message;
 #include maps\mp\killstreaks\_killstreaks;
 #include maps\mp\_events;
 #include maps\mp\killstreaks\_teamammorefill;
-#include scripts\nukespawns;
 
 init()
 {
     level thread onPlayerConnect();
 	level thread replaceSpecialist();
-}   
+}
  
 onPlayerConnect()
 {
@@ -28,13 +28,38 @@ onPlayerSpawned()
     self endon("disconnect");
     level endon("game_ended");
     for(;;)
-	
     {	
 		self waittill ("spawned_player");
 		level.blastShieldMod = 0.3; 	//Blast Shield Hella Buffed
 		self thread superSoldier();
-		self thread defaultPerkValues();
 	}    
+}
+
+showKillstreakAlert( icon_name, message , sound ) {
+	wait 0.2;
+
+	self iprintlnbold( message );
+	self playlocalsound( sound );
+
+	self.newIcon = self createIcon( icon_name , 50 , 50 ); 
+	self.newIcon.alpha = 0;
+	self.newIcon.alignX = "CENTER";      
+	self.newIcon.alignY = "CENTER";            
+	self.newIcon.x = 425;                      
+	self.newIcon.y = 90;                               
+	self.newIcon.HideWhenInMenu = true;       
+	self.newIcon.foreground = false;
+	
+	self.newIcon fadeOverTime(0.3);
+	self.newIcon.alpha = 1;
+
+	wait 2.5;
+	self.newIcon fadeOverTime(0.3);
+	self.newIcon.alpha = 0;
+
+	wait 0.3;
+	self.newIcon destroy();
+
 }
 
 replaceSpecialist()
@@ -162,7 +187,7 @@ superSoldier()
 
 			if (messageShownAutoReload == 0)
 			{
-				self iprintlnbold( "^3 16 Killstreak: ^2Kills Fill Magazine!" );
+				showKillstreakAlert( "specialty_fastreload_upgrade", "^3 16 Killstreak: ^2Kills Fill Magazine!" , "mp_vest_deployed_ui" );
 				messageShownAutoReload = 1;
 			}
 		}
@@ -190,7 +215,7 @@ superSoldier()
 
 			if (messageShownHealthRegen == 0)
 			{
-				self iprintlnbold( "^3 20 Killstreak: ^2Kills Trigger Health Regeneration!" );
+				showKillstreakAlert( "specialty_coldblooded_upgrade", "^3 20 Killstreak: ^2Kills Trigger Health Regeneration!" , "mp_vest_deployed_ui" );
 				messageShownHealthRegen = 1;
 			}
 		}
@@ -206,18 +231,11 @@ superSoldier()
 	}
 }
 
-defaultPerkValues()
-{
-	self setclientdvar( "perk_quickDrawSpeedScale" , "1.5" );
-	self _setperk( "specialty_longersprint" , 1 ); 			
-	self _setperk( "specialty_fastmantle" , 1 ); 				
-}
-
 giveSpecialtyQuickdraw()
 {
 	self _setPerk ("specialty_quickdraw",1);	
 	self setclientdvar ("perk_quickDrawSpeedScale","1.82");
-	self iprintlnbold ("^3 12 Killstreak: ^2ADS Speed Increased!");
+	showKillstreakAlert( "specialty_quickdraw_upgrade", "^3 12 Killstreak: ^2ADS Speed Increased!" , "mp_vest_deployed_ui" );
 	return;
 }
 
@@ -226,7 +244,7 @@ giveSpecialtyMovementSpeed()
 	self _setPerk( "specialty_lightweight", 1 );
 	self.moveSpeedScaler = 1.35;
 	self setmovespeedscale( self.moveSpeedScaler );
-	self iprintlnbold( "^3 14 Killstreak: ^2Movement Speed Increased!" );
+	showKillstreakAlert( "specialty_longersprint_upgrade", "^3 14 Killstreak: ^2Movement Speed Increased!" , "mp_vest_deployed_ui" );
 	return;
 }
 
@@ -256,7 +274,8 @@ givesuperSteadyAim()
 {
 	self setaimspreadmovementscale( 0.2 );
 	self setspreadoverride( 2 );
-	self iprintlnbold( "^3 18 Killstreak: ^2Hip-Fire Accuracy Increased!" );
+	showKillstreakAlert( "specialty_steadyaim_upgrade", "^3 18 Killstreak: ^2Hip-Fire Accuracy Increased!" , "mp_vest_deployed_ui" );
+
 	return;
 }
 
@@ -269,6 +288,6 @@ triggerHealthRegen()
 giveSpecialtyDamage()
 {
 	self _setPerk ("specialty_moredamage");
-	self iprintlnbold( "^3 25 Killstreak: ^2All Bullet Damage Increased!" );
+	showKillstreakAlert( "specialty_perks_all", "^3 25 Killstreak: ^2All Bullet Damage Increased!" , "mp_vest_deployed_ui" );
 	return;
 }
