@@ -32,6 +32,21 @@ onPlayerSpawned()
 		self waittill ("spawned_player");
 		level.blastShieldMod = 0.3; 	//Blast Shield Hella Buffed
 		self thread superSoldier();
+
+		if( self.activeIcons != undefined )
+		{
+			for(i = 0; i < self.activeIcons.size; i++)
+			{
+				if ( self.activeIcons[i] != undefined ) {
+					self.activeIcons[i] destroy();
+				}
+			}
+			self.activeIcons.clear();
+		}
+		else
+		{
+			self.activeIcons = [];
+		}
 	}    
 }
 
@@ -49,6 +64,8 @@ showKillstreakAlert( icon_name, message , sound ) {
 	self.newIcon.y = 90;                               
 	self.newIcon.HideWhenInMenu = true;       
 	self.newIcon.foreground = false;
+
+	self.activeIcons pushBack(self.newIcon);
 	
 	self.newIcon fadeOverTime(0.3);
 	self.newIcon.alpha = 1;
@@ -58,8 +75,8 @@ showKillstreakAlert( icon_name, message , sound ) {
 	self.newIcon.alpha = 0;
 
 	wait 0.3;
+	self.activeIcons remove(self.newIcon);
 	self.newIcon destroy();
-
 }
 
 replaceSpecialist()
