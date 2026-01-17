@@ -31,73 +31,95 @@ onPlayerSpawned()
     {	
 		self waittill ("spawned_player");
 		level.blastShieldMod = 0.3; 	//Blast Shield Hella Buffed
-		self thread superSoldier();
 
-		if ( self.activeIcons != undefined ) {
-			for ( i = 0; i < self.activeIcons.size; i++ ) {
-				if ( self.activeIcons[i] != undefined ) {
-					self.activeIcons[i] destroy();
-				}
-			}
-			
-			// reset icons
-			for ( i = 0; i < self.activeIconsSize; i++ ) {
-				self.activeIcons[i] = [];
-			}
-		}
-		else
-		{
-			self.activeIcons = [];
-			self.activeIconsSize = 50;
-			for ( i = 0; i < self.activeIconsSize; i++ ) {
-				self.activeIcons[i] = [];
-			}
-		}
+		self initKsIcons();
+        self cleanupKsIcons();
+		self thread superSoldier();
 	}    
 }
 
-showKillstreakAlert( icon_name, message , sound ) {
-	wait 0.2;
+initKsIcons()
+{
+    if ( isDefined(self.ksIcons) )
+        return;
 
-	self iprintlnbold( message );
-	self playlocalsound( sound );
+    self.ksIconsMax = 6;
+    self.ksIcons = [];
 
-	self.newIcon = self createIcon( icon_name , 50 , 50 ); 
-	self.newIcon.alpha = 0;
-	self.newIcon.alignX = "CENTER";      
-	self.newIcon.alignY = "CENTER";            
-	self.newIcon.x = 425;                      
-	self.newIcon.y = 90;                               
-	self.newIcon.HideWhenInMenu = true;       
-	self.newIcon.foreground = false;
+    for ( i = 0; i < self.ksIconsMax; i++ )
+        self.ksIcons[i] = undefined;
+}
 
-	setIndex = -1;
-	for ( i = 0; i < self.activeIconsSize; i++ ) {
-		if ( self.activeIcons[i] != undefined ) {
-			
-		} else {
-			setIndex = i;
-			self.activeIcons[i] = self.newIcon;
-			break;
-		}
-	}
-	
-	self.newIcon fadeOverTime(0.3);
-	self.newIcon.alpha = 1;
+cleanupKsIcons()
+{
+    // Kill all icon threads immediately
+    self notify("clear_icons");
 
-	wait 2.5;
-	self.newIcon fadeOverTime(0.3);
-	self.newIcon.alpha = 0;
+    for ( i = 0; i < self.ksIconsMax; i++ )
+    {
+        if ( isDefined(self.ksIcons[i]) )
+        {
+            self.ksIcons[i] destroyElem();
+            self.ksIcons[i] = undefined;
+        }
+    }
+}
 
-	wait 0.3;
-	
-	if ( setIndex != -1 ) {
-		if ( self.activeIcons[setIndex] != undefined ) {
-			self.activeIcons[setIndex] = [];
-		}
-	}
+showKillstreakAlert( icon_name, message, sound )
+{
+    self endon("disconnect");
+    self endon("clear_icons");
 
-	self.newIcon destroy();
+    self iprintlnbold(message);
+    self playlocalsound(sound);
+
+    icon = self createIcon(icon_name, 50, 50);
+    icon.archived = false; // engine safety
+
+    // Find a free slot
+    slot = -1;
+    for ( i = 0; i < self.ksIconsMax; i++ )
+    {
+        if ( !isDefined(self.ksIcons[i]) )
+        {
+            slot = i;
+            self.ksIcons[i] = icon;
+            break;
+        }
+    }
+
+    // If all slots are full, destroy immediately
+    if ( slot == -1 )
+    {
+        icon destroyElem();
+        return;
+    }
+
+    // Icon setup
+    icon.alpha = 0;
+    icon.alignX = "CENTER";
+    icon.alignY = "CENTER";
+    icon.x = 425;
+    icon.y = 90; 
+    icon.HideWhenInMenu = true;
+    icon.foreground = false;
+
+    // Fade in
+    icon fadeOverTime(0.3);
+    icon.alpha = 1;
+
+    wait 2.25;
+
+    // Fade out
+    icon fadeOverTime(0.3);
+    icon.alpha = 0;
+
+    // Safe cleanup
+    if ( isDefined(self.ksIcons[slot]) )
+    {
+        self.ksIcons[slot] = undefined;
+        icon destroyElem();
+    }
 }
 
 replaceSpecialist()
